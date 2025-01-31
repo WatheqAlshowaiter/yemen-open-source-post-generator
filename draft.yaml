@@ -1,0 +1,36 @@
+# # models:
+#    Post:
+#       url: string required
+#       username: string required
+#       generated_content: text nullable
+#       generted_title: string nullable
+#       forked_url: string nullable
+#       social_links: json nullable
+#       other_links: json nullable
+#       description: string nullable
+# seeders: Post
+
+controllers:
+ Post:
+  index:
+    query: all
+    render: posts.index with posts
+  create:
+    render: posts.create
+  store:
+    validate: url, username, generated_content, generted_title, forked_url, social_links, other_links, description
+    save: post
+    flash: post.url
+    redirect: posts.index
+  edit:
+    render: posts.edit with post
+  update:
+    validate: url, username, generated_content, generted_title, forked_url, social_links, other_links, description
+    save: post
+    flash: post.url
+    redirect: posts.index
+  destroy:
+    delete: post
+    flash: post.url
+    redirect: posts.index
+    
