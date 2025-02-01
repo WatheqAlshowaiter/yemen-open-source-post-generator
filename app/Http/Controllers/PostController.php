@@ -15,6 +15,7 @@ class PostController
     {
         $posts = Post::all();
 
+        //todo remove unused comments
         return view('posts.index', [
             'posts' => $posts,
         ]);
@@ -22,6 +23,7 @@ class PostController
 
     public function create(Request $request): View
     {
+        // todo make it Arabic site
         return view('posts.create');
     }
 

@@ -135,12 +135,12 @@
           <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl">
             <a href="{{route('posts.index')}}">Posts</a>
           </h1>
-  
+
         </div>
-  
+
         <div class="flex items-center gap-4">
           <a
-            class="inline-block rounded-sm bg-indigo-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-indigo-700 focus:ring-3 focus:outline-hidden"
+            class="inline-block rounded-lg bg-blue-500 px-5 py-3 text-sm font-medium text-white transition hover:bg-blue-600 focus:ring-3 focus:outline-hidden"
             type="button"
             href="{{route('posts.create')}}"
           >
