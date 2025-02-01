@@ -1,7 +1,3 @@
-{{--
-    @extends('layouts.app')
-
-    @section('content')
-        posts.index template
-    @endsection
---}}
+<x-app-layout>
+    
+</x-app-layout>
