@@ -2,112 +2,202 @@
 
 namespace App\Livewire;
 
+use App\Events\PostCreatedEvent;
+use App\Models\Post;
+use App\Spiders\Client;
+use App\Spiders\GitHubProfileSocialMedia;
 use Http;
 use Livewire\Component;
+use Symfony\Component\BrowserKit\HttpBrowser;
+use Symfony\Component\HttpClient\HttpClient;
 
 class PostForm extends Component
 {
-    public $forkedUrl;
-    public $originalUrl;
-    public $repoDescription;
-    public $authorName;
-    public $githubUserProfile;
-    public $linkedinProfile;
-    public $authorWebsite;
-    public $additionalLinks = [];
-    public $additionalSocialLinks = [];
+    public $forked_url;
+    public $original_url;
+    public $repo_description;
+    public $author_name;
+    public $github_user_profile;
+    public $linkedin_profile;
+    public $facebook_profile;
+    public $twitter_profile;
+    public $author_website;
+    public $additional_links = [];
+
 
     public function render()
     {
-        // todo loading spinner
-        // todo validation
-        // todo grid for form and generated post 
         return view('livewire.post-form');
     }
 
     public function fetchData()
-    {   
-        if(!$this->forkedUrl)
-        {
-            // todo valite only the forked url to be required and valid url
-        }
+    {
+        $this->validate([
+            'forked_url' => ['required', 'url' , function($attribute, $value, $fail) {
+                if (!\Str::startsWith(strtolower(trim($value)), 'https://github.com/yemenopensource/')) {
+                    $fail('The forked url must be a valid Yemen Open Source forked url.');
+                }
+            }],
+        ], [
+            'forked_url.required' => 'The forked url is required to fetch data.',
+        ]);
 
-        $repoPath = \Str::of($this->forkedUrl)
-                        ->replace('https://github.com/','https://api.github.com/repos/', $this->forkedUrl)
-                        ->value();
+        $repoPath = \Str::of($this->forked_url)
+            ->replace('https://github.com/', 'https://api.github.com/repos/', $this->forked_url)
+            ->value();
 
-                        
 
         $results = Http::get($repoPath)->fluent();
 
-        $this->originalUrl = data_get($results, 'parent.html_url');
-        $this->repoDescription = data_get($results, 'parent.description');
-        
-        $authorUrl = data_get($results, 'parent.owner.url');
-        $authorUrlResult =  Http::get($authorUrl)->fluent();
+        if (data_get($results, 'parent.owner.type') === 'Organization') {
 
-        if(data_get($results, 'parent.owner.type') === 'organization')
-        {
-            // todo get username from the 
-        }else { 
+            $this->original_url = data_get($results, 'parent.html_url');
 
-            $Arabic = new \ArPHP\I18N\Arabic();
+            $repoUrl = 'https://api.github.com/repos/' . data_get($results, 'parent.full_name');
 
-            $englishAuthorName = $authorUrlResult->name;
+            $orgRepoResults = Http::get($repoUrl)->fluent();
 
-            $this->authorName = $Arabic->en2ar($englishAuthorName);
+            $this->repo_description = data_get($orgRepoResults, 'description');
+
+            //dd(
+            //    'https://api.github.com/orgs/'.  data_get($orgRepoResults, 'owner.login')
+            //);
+            $orgResults = Http::get('https://api.github.com/orgs/' . data_get($orgRepoResults, 'owner.login'))->fluent();
+
+            $authorResult = Http::get(data_get($orgResults, 'members_url'))->fluent();
+
+            $authorUrl = data_get($authorResult , '0.url');
+
+            $this->github_user_profile = data_get($authorResult , '0.html_url');
+
+
+        } else {
+             $this->original_url = data_get($results, 'parent.html_url');
+
+             $authorUrl = data_get($results, 'parent.owner.url');
+
+             $this->repo_description = data_get($results, 'parent.description');
+
+            $this->github_user_profile = data_get($results, 'parent.owner.html_url');
         }
 
-        $this->githubUserProfile = data_get($results, 'parent.owner.html_url');
+        $authorUrlResult = Http::get($authorUrl)->fluent();
+
+        $Arabic = new \ArPHP\I18N\Arabic();
+
+        $englishAuthorName = $authorUrlResult->name;
+
+        // todo use yamli to generate the arabic name
+        $this->author_name = $Arabic->en2ar($englishAuthorName);
 
 
-        // todo scrape the linkedin link from the $authorUrl
+        $client = new HttpBrowser();
 
-        $this->authorWebsite = $authorUrlResult->blog;
+        $crawler = $client->request('GET', $this->github_user_profile);
 
-        if($authorUrlResult->twitter_username){
-            $this->additionalSocialLinks[]= 'https://x.com/' . $authorUrlResult->twitter_username;
+        $elements = $crawler->filter('.Link--primary[style*="overflow-wrap: anywhere"]');
+
+        $scrapedLinks = $elements->filter('a')->each(function ($link) {
+            return $link->attr('href');
+        });
+
+        $unmergedLinks = collect($scrapedLinks)
+            ->map(function ($link) {
+                if (\Str::startsWith($link, ['https://www.linkedin.com/', 'https://linkedin.com/in/'])) {
+                    return [
+                        'linkedin' => $link,
+                    ];
+                }
+
+                if (\Str::startsWith($link, ['https://www.facebook.com/', 'https://facebook.com/'])) {
+                    return [
+                        'facebook' => $link,
+                    ];
+                }
+
+                return [];
+            })
+            ->filter()
+            ->all();
+
+        $this->author_website = \Str::start($authorUrlResult->blog , 'https://' ) ;
+
+        $links = [];
+        foreach ($unmergedLinks as $item) {
+            $links = array_merge($links, $item);
         }
-        
+
+
+        if (data_get($links, 'linkedin')) {
+            $this->linkedin_profile = $links['linkedin'];
+        }
+
+        if ($authorUrlResult->twitter_username) {
+            $this->twitter_profile = 'https://x.com/'.$authorUrlResult->twitter_username;
+        }
+
+        if (data_get($links, 'facebook')) {
+            $this->facebook_profile = $links['facebook'];
+        }
     }
 
     public function updatedAdditionalLinks($links)
     {
-        $linksArr = explode("\n",$links);
+        $linksArr = explode("\n", $links);
 
         $links = collect($linksArr)
-                ->map(function ($link) {
-                    return \Str::squish($link);
-                })
+            ->map(function ($link) {
+                return \Str::squish($link);
+            })
             ->filter(fn($link) => \Str::isUrl($link))
             ->unique()
             ->all();
 
-        $this->additionalLinks = $links;
+        $this->additional_links = $links;
     }
 
-    public function updatedAdditionalSocialLinks($links)
+
+    // public function updatedAuthorName($name)
+    // {
+    //     $linksArr = explode("\n", $links);
+
+    //     $links = collect($linksArr)
+    //         ->map(function ($link) {
+    //             return \Str::squish($link);
+    //         })
+    //         ->filter(fn($link) => \Str::isUrl($link))
+    //         ->unique()
+    //         ->all();
+
+    //     $this->additionalLinks = $links;
+    // }
+
+
+    // trigger when the additionalLinks is updated
+
+    public function submit(): void
     {
-        $linksArr = explode("\n",$links);
+        $validated = $this->validate([
+            'forked_url' => ['nullable', 'url'],
+            'original_url' => ['required', 'url'],
+            'repo_description' => ['required', 'string'],
+            'author_name' => ['required', 'string'],
+            'github_user_profile' => ['nullable', 'string', 'url'],
+            'linkedin_profile' => ['nullable', 'string', 'url'],
+            'facebook_profile' => ['nullable', 'string', 'url'],
+            'twitter_profile' => ['nullable', 'string', 'url'],
+            'author_website' => ['nullable', 'string', 'url'],
+            'additional_links' => ['nullable', 'array'],
+            'additional_links.*' => ['nullable', 'string', 'url'],
+        ]);
 
-        $links = collect($linksArr)
-                ->map(function ($link) {
-                    return \Str::squish($link);
-                })
-            ->filter(fn($link) => \Str::isUrl($link))
-            ->unique()
-            ->all();
+        //dd($validated);
 
-        $this->additionalSocialLinks = $links;
-    }
+        Post::updateOrCreate([
+            'original_url'=> $validated['original_url'],
+        ], $validated);
 
-    // trigger when the additonalLinks is updated
 
-    public function submit()
-    {
-        dd(
-            $this->additionalLinks ,
-            $this->additionalSocialLinks
-        );
+        $this->dispatch('post-created');
     }
 }

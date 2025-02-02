@@ -12,14 +12,17 @@ class PostStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'url' => ['required', 'string'],
-            'username' => ['required', 'string'],
-            'generated_content' => ['nullable', 'string'],
-            'generted_title' => ['nullable', 'string'],
-            'forked_url' => ['nullable', 'string'],
-            'social_links' => ['nullable', 'json'],
-            'other_links' => ['nullable', 'json'],
-            'description' => ['nullable', 'string'],
+            'forked_url' => ['required', 'url'],
+            'original_url' => ['required', 'url'],
+            'repo_description' => ['required', 'string'],
+            'author_name' => ['required', 'string'],
+            'github_user_profile' => ['nullable', 'string', 'url'],
+            'linkedin_profile' => ['nullable', 'string', 'url'],
+            'facebook_profile' => ['nullable', 'string', 'url'],
+            'twitter_profile' => ['nullable', 'string', 'url'],
+            'author_website' => ['nullable', 'string', 'url'],
+            'additional_links' => ['nullable', 'array'],
+            'additional_links.*' => ['nullable', 'string', 'url'],
         ];
     }
 }

@@ -2,33 +2,31 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 use App\Models\Post;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Carbon;
 
 class PostFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
     protected $model = Post::class;
 
-    /**
-     * Define the model's default state.
-     */
     public function definition(): array
     {
         return [
-            'url' => fake()->url(),
-            'username' => fake()->userName(),
-            'generated_content' => fake()->text(),
-            'generted_title' => fake()->word(),
-            'forked_url' => fake()->word(),
-            'social_links' => '{}',
-            'other_links' => '{}',
-            'description' => fake()->text(),
+            'updated_at' => Carbon::now(),
+            'created_at' => Carbon::now(),
+            'forked_url' => $this->faker->url(),
+            'original_url' => $this->faker->url(),
+            'repo_description' => $this->faker->text(),
+            'author_name' => $this->faker->name(),
+            'github_user_profile' => $this->faker->url(),
+            'linkedin_profile' => $this->faker->url(),
+            'facebook_profile' => $this->faker->url(),
+            'twitter_profile' => $this->faker->url(),
+            'author_website' => $this->faker->url(),
+            'additional_links' => [],
+            'generated_title' => $this->faker->word(),
+            'generated_content' => $this->faker->realText(),
         ];
     }
 }

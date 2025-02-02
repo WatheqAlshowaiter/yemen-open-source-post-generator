@@ -13,14 +13,18 @@ return new class extends Migration
     {
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
-            $table->string('url');
-            $table->string('username');
-            $table->text('generated_content')->nullable();
-            $table->string('generted_title')->nullable();
             $table->string('forked_url')->nullable();
-            $table->json('social_links')->nullable();
-            $table->json('other_links')->nullable();
-            $table->string('description')->nullable();
+            $table->string('original_url');
+            $table->string('repo_description');
+            $table->string('author_name');
+            $table->string('github_user_profile')->nullable();
+            $table->string('linkedin_profile')->nullable();
+            $table->string('facebook_profile')->nullable();
+            $table->string('twitter_profile')->nullable();
+            $table->string('author_website')->nullable();
+            $table->string('additional_links')->nullable();
+            $table->text('generated_content')->nullable();
+            $table->string('generated_title')->nullable();
             $table->timestamps();
         });
     }

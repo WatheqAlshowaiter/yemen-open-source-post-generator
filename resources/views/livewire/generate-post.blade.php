@@ -1,14 +1,14 @@
 <div class="mx-auto max-w-lg text-center bg:gray-500">
     <h1 class="text-2xl font-bold sm:text-3xl">Generated Post 👇</h1>
 
-    <form wire:submit="submit" class="mx-auto mt-8 mb-0 max-w-md space-y-4">
+    <form wire:submit="submit" class="mx-auto mt-8 mb-0 space-y-4">
         <div>
             <div class="relative">
                 <textarea
-                    wire:model="repoDescription"
-                    id="repo_description"
+                    wire:model="generated_post"
+                    id="generated_post"
                     class="w-full rounded-lg border-gray-200 border-dashed p-4 pe-12 text-sm shadow-xs"
-                    placeholder="..."
+                    placeholder=""
                     rows="20"
                 ></textarea>
             </div>

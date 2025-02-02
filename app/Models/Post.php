@@ -15,14 +15,18 @@ class Post extends Model
      * @var array
      */
     protected $fillable = [
-        'url',
-        'username',
-        'generated_content',
-        'generted_title',
         'forked_url',
-        'social_links',
-        'other_links',
-        'description',
+        'original_url',
+        'repo_description',
+        'author_name',
+        'github_user_profile',
+        'linkedin_profile',
+        'facebook_profile',
+        'twitter_profile',
+        'author_website',
+        'additional_links',
+        'generated_content',
+        'generated_title',
     ];
 
     /**
@@ -31,8 +35,6 @@ class Post extends Model
      * @var array
      */
     protected $casts = [
-        'id' => 'integer',
-        'social_links' => 'array',
-        'other_links' => 'array',
+        'additional_links' => 'array',
     ];
 }

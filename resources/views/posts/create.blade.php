@@ -8,8 +8,5 @@
        <livewire:generate-post />
     </aside>
   </div>
-
 </div>
-</div>
-
 </x-app-layout>

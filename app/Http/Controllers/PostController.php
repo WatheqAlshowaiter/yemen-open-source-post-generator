@@ -15,7 +15,7 @@ class PostController
     {
         $posts = Post::all();
 
-        //todo remove unused comments
+            //todo remove unused comments
         return view('posts.index', [
             'posts' => $posts,
         ]);
