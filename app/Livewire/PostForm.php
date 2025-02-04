@@ -193,11 +193,11 @@ class PostForm extends Component
 
         //dd($validated);
 
-        Post::updateOrCreate([
+       $post = Post::updateOrCreate([
             'original_url'=> $validated['original_url'],
         ], $validated);
 
 
-        $this->dispatch('post-created');
+        $this->dispatch('post-created', $post->id);
     }
 }
