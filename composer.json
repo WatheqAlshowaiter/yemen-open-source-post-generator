@@ -11,6 +11,7 @@
         "laravel/framework": "^11.31",
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^3.5",
+        "stichoza/google-translate-php": "^5.2",
         "symfony/browser-kit": "^7.2",
         "symfony/css-selector": "^7.2",
         "symfony/http-client": "^7.2"

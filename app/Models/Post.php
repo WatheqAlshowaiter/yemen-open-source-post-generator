@@ -17,7 +17,9 @@ class Post extends Model
     protected $fillable = [
         'forked_url',
         'original_url',
+        'repo_name',
         'repo_description',
+        'repo_tags',
         'author_name',
         'github_user_profile',
         'linkedin_profile',
@@ -27,6 +29,7 @@ class Post extends Model
         'additional_links',
         'generated_content',
         'generated_title',
+        'generated_tweet',
     ];
 
     /**
@@ -36,5 +39,6 @@ class Post extends Model
      */
     protected $casts = [
         'additional_links' => 'array',
+        'repo_tags' => 'array',
     ];
 }

@@ -15,8 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('forked_url')->nullable();
             $table->string('original_url');
+            $table->string('repo_name');
             $table->string('repo_description');
             $table->string('author_name');
+            $table->string('repo_tags')->nullable();
             $table->string('github_user_profile')->nullable();
             $table->string('linkedin_profile')->nullable();
             $table->string('facebook_profile')->nullable();

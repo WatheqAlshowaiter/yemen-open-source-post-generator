@@ -8,6 +8,15 @@
 
     <form wire:submit="submit" class="mx-auto mt-8 mb-0 space-y-4">
 
+        {{-- all errors --}}
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li class="text-red-500">{{ $error }}</li>
+            @endforeach
+        </ul>
+        {{-- all validation errors --}}
+
+
         <!-- Yemen Open Source Forked URL -->
         <div>
             <label for="forked_url" class="text-sm font-medium text-gray-700">Yemen Open Source Forked URL </label>
@@ -26,8 +35,21 @@
                     class="w-1/5 relative inline-block rounded-lg bg-blue-500 flex-grow-1 px-3 py-1 text-sm font-medium text-white transition hover:bg-blue-600 focus:ring-3 focus:outline-hidden"
                 >
                     <span wire:loading.class="invisible">Fetch Data</span>
-                    <span wire:loading.flex class="flex absolute top-0 left-0 justify-center items-center w-full h-full">
-                        <svg class="w-3 h-3 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <span wire:loading.flex
+                          class="flex absolute top-0 left-0 justify-center items-center w-full h-full">
+{{--                        <svg class="w-3 h-3 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none"--}}
+                        {{--                             viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"--}}
+                        {{--                                                         stroke-width="4"></circle><path class="opacity-75"--}}
+                        {{--                                                                                         fill="currentColor"--}}
+                        {{--                                                                                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>--}}
+                        {{--                        </svg>--}}
+                        <svg class="w-3 h-3 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none"
+                             viewBox="0 0 24 24">
+  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+  <path class="opacity-75" fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+</svg>
+
                     </span>
                 </button>
 
@@ -64,24 +86,69 @@
         </div>
         <!-- ./Original URL -->
 
+        <!-- repo name -->
+        <div>
+            <label for="repo_name" class="text-sm font-medium text-gray-700">Repo name <span
+                    class="text-red-500">*</span></label>
+
+            <div class="relative">
+
+                <input
+                    wire:model="repo_name"
+                    id="repo_name"
+                    class="w-full rounded-lg border-gray-200 p-4 pe-12 text-sm shadow-xs"
+                    placeholder="Deepseek Php Client"
+                />
+
+                <div>
+                    @error('repo_name') <span class="text-red-500">{{ $message }}</span> @enderror
+                </div>
+
+            </div>
+        </div>
+        <!-- ./repo name -->
+
         <!-- repo description -->
         <div>
-            <label for="repo_description" class="text-sm font-medium text-gray-700">Repo description <span
+            <label for="repo_description" class="text-sm font-medium text-gray-700">Repo description (in Arabic)<span
                     class="text-red-500">*</span></label>
 
             <div class="relative">
           <textarea
+              dir="rtl"
               wire:model="repo_description"
               id="repo_description"
-              type="url"
               class="w-full rounded-lg border-gray-200 p-4 pe-12 text-sm shadow-xs"
-              placeholder="https://github.com/deepseek-php/deepseek-php-client"
+              placeholder="باكج للتكامل مع DeepSeek مع تطبيقات PHP"
               rows="6"
           ></textarea>
 
-          <div>
-            @error('repo_description') <span class="text-red-500">{{ $message }}</span> @enderror
+                <div>
+                    @error('repo_description') <span class="text-red-500">{{ $message }}</span> @enderror
+                </div>
+
+            </div>
         </div>
+        <!-- ./repo description -->
+
+        <!-- repo tags -->
+        <div>
+            <label for="repo_tags_string" class="text-sm font-medium text-gray-700">Repo tags <span
+                    class="text-red-500">*</span></label>
+
+            <div class="relative">
+          <textarea
+              wire:model="repo_tags_string"
+              id="repo_tags_string"
+              class="w-full rounded-lg border-gray-200 p-4 pe-12 text-sm shadow-xs"
+              placeholder="yemen_open_source, larvel, php"
+              rows="2"
+          ></textarea>
+
+                <div>
+                    @error('repo_tags_string') <span class="text-red-500">{{ $message }}</span> @enderror
+                    @error('repo_tags') <span class="text-red-500">{{ $message }}</span> @enderror
+                </div>
 
             </div>
         </div>
@@ -217,13 +284,13 @@
 
         <!-- Additional links -->
         <div>
-            <label for="additional_links" class="text-sm font-medium text-gray-700">Additional links (seperated by new
+            <label for="additional_links_string" class="text-sm font-medium text-gray-700">Additional links (seperated by new
                 lines)</label>
 
             <div class="relative">
                 <textarea
-                    wire:model="additional_links"
-                    id="additional_links"
+                    wire:model="additional_links_string"
+                    id="additional_links_string"
                     class="w-full rounded-lg border-gray-200 p-4 pe-12 text-sm shadow-xs"
                     placeholder="https://github.com/deepseek-php/deepseek-laravel
 https://laravel-news.com/deepseek-laravel"
@@ -231,9 +298,10 @@ https://laravel-news.com/deepseek-laravel"
                 ></textarea>
 
 
-            <div>
-                @error('additional_links') <span class="text-red-500">{{ $message }}</span> @enderror
-            </div>
+                <div>
+                    @error('additional_links') <span class="text-red-500">{{ $message }}</span> @enderror
+                    @error('additional_links_string') <span class="text-red-500">{{ $message }}</span> @enderror
+                </div>
             </div>
         </div>
         <!-- ./Additional links -->

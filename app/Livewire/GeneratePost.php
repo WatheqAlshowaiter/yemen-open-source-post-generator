@@ -3,6 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\Post;
+use App\ollamaPostAction;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Livewire\Component;
 use Livewire\Attributes\On;
@@ -11,11 +13,11 @@ use Livewire\Attributes\On;
 class GeneratePost extends Component
 {
     public $postGenerated = false;
-    
+
     public $generated_post = '';
 
     public $post_created = false;
-    
+
     public $response = '';
 
     public $prompt = '';
@@ -24,9 +26,11 @@ class GeneratePost extends Component
 
     public Post $post;
 
+    public array $introductions = [];
 
     // get the Post model instance in the mount
-    public function mount(){
+    public function mount()
+    {
 
     }
 
@@ -41,25 +45,163 @@ class GeneratePost extends Component
         return view('livewire.generate-post');
     }
 
+    /**
+     * @throws ConnectionException
+     */
     #[On('post-created')]
     public function onPostCreated(Post $post)
     {
+        // تبقى تضبيط شيئين
+        // وصف المشروع
+        // ال tags
+        //        give me 3-5 tags from this text, inline them and make them snake_case, add them to #yemen_open_source and #yemenopensource. return only the tags, not more text needed.
+        //⚡️ supercharged community-maintained PHP API client that allows you to interact with deepseek API
+
+
         $this->post = $post;
 
+        $this->response = '';
+        $this->generated_post = '';
+
+
+        $introductions = [
+            "عدنا لكم هذه المرة مع المبدع {$this->post->author_name}!",
+            "مرحباً بكم مجدداً! يعود إلينا {$this->post->author_name} بإبداع جديد في عالم البرمجة مفتوحة المصدر.",
+            "مشروع جديد من المبدع {$this->post->author_name}!",
+            "نرحب بالمبرمج {$this->post->author_name} الذي يقدم لنا مشروعاً جديداً ومميزاً!",
+            "مرحباً مجدداً! يقدم لنا {$this->post->author_name} مشروعاً جديداً يستحق المتابعة.",
+            "عودتنا مع المبدع {$this->post->author_name} وابتكار جديد في البرمجة مفتوحة المصدر!",
+            "مشروع جديد من المبدع {$this->post->author_name}! انضموا إلينا لاكتشاف المزيد.",
+            "نعود إليكم مع {$this->post->author_name} الذي قدم لنا إبداعاً جديداً في مجال البرمجيات مفتوحة المصدر.",
+            "عدنا لكم هذه المرة مع المبرمج {$this->post->author_name} الذي يقدم لنا مشروعه الجديد.",
+            "مشروع جديد من {$this->post->author_name} المبدع الذي يضيف الكثير لمجتمع البرمجيات مفتوحة المصدر."
+        ];
+
+
+        $introducingProjects = [
+            "ومشروعه هو \"{$post->repo_name}\"",
+            "والمشروع هو \"{$post->repo_name}\"",
+            "اسم المشروع \"{$post->repo_name}\""
+        ];
+
+        // random from $introduction array
+
+        $this->generated_post = $introductions[array_rand($introductions)]."\n\n";
+        $this->generated_post .= $introducingProjects[array_rand($introducingProjects)]."\n\n";
+
+        //$this->generated_post .= $this->response . "\n\n";
+
+        $this->generated_post .= "وصف المشروع\n";
+        $this->generated_post .= $post->repo_description . "\n\n";
+
+        $this->generated_post .= implode(' ', $this->arrayToHashtags($post->repo_tags ?? [])) ."\n\n";
+
+
+        //dd($this->generated_post);
+
+        $this->generated_post .= "الروابط:\n";
+
+        $this->generated_post .= "رابط المشروع\n";
+        $this->generated_post .= $this->post->original_url."\n\n";
+
+
+        if ($this->post->forked_url) {
+            $this->generated_post .= "رابط المشروع على YemenOpenSource\n";
+            $this->generated_post .= $this->post->forked_url."\n\n";
+        }
+
+        $this->generated_post .= "حساب ".$this->post->author_name." على GitHub\n";
+        $this->generated_post .= $this->post->github_user_profile."\n\n";
+
+        if ($this->post->linkedin_profile) {
+            $this->generated_post .= "على لينكدن\n";
+            $this->generated_post .= $this->post->linkedin_profile."\n\n";
+        }
+
+        if ($this->post->twitter_profile) {
+            $this->generated_post .= "تويتر (إكس)\n";
+            $this->generated_post .= $this->post->twitter_profile."\n\n";
+        }
+
+        if ($this->post->facebook_profile) {
+            $this->generated_post .= "فيس بوك\n";
+            $this->generated_post .= $this->post->facebook_profile."\n\n";
+        }
+
+        if ($this->post->author_website) {
+            $this->generated_post .= "الموقع الشخصي\n";
+            $this->generated_post .= $this->post->author_website."\n\n";
+        }
+
+        if (count($this->post->additional_links) > 0) {
+            $this->generated_post .= "روابط أخرى\n";
+            $this->generated_post .= implode("\n", $this->post->additional_links);
+        }
+
+        $this->generated_post .= "\n\nوندعوكم في المساهمة في مشاريعنا مفتوحة المصدر سواء بالتطوير البرمجي أو الترويج لها في مختلف منصات مواقع التواصل الاجتماعي..
+ولا تنسوا متابعة صفحاتنا على مواقع التواصل الاجتماعي كي لا تفوتكم أي مشاريع جديدة ومفيدة..";
+
+        $this->generateTeet($this->post);
+
+
+    }
+
+    public function generateTeet(Post $post){
+
+    }
+
+    public function modelUpdated()
+    {
+        // $this->response = '';
+    }
+
+    public function listModels()
+    {
+        $command = 'ollama list';
+        $output = [];
+        $returnVar = null;
+        exec($command, $output, $returnVar);
+        if ($returnVar === 0) {
+            $this->models = $output;
+        } else {
+            $this->models = ['Error: Unable to fetch models'];
+        }
+
+        $modelsFiltered = [];
+
+        foreach ($this->models as $index => $model) {
+            if ($index != 0) {
+                $modelParts = explode(':', $model);
+                array_push($modelsFiltered, $modelParts[0]);
+            }
+        }
+        $this->models = $modelsFiltered;
+    }
+
+    public function submit()
+    {
+        $validated = $this->validate([
+            'generated_post' => ['required', 'string'],
+        ]);
+
+        $this->post->update(['generated_content' => $validated['generated_post']]);
+
+        return redirect()->route('posts.index');
+    }
+
+    /**
+     * @param  Post  $post
+     *
+     * @return void
+     * @throws ConnectionException
+     */
+    private function ollamaResponse(Post $post): void
+    {
         ob_start();
-        //        $client = new GuzzleHttp\Client();
-        $response = Http::withOptions(['stream' => true])
-            ->withHeaders([
-                'Content-Type' => 'text/event-stream',
-                'Cache-Control' => 'no-cache',
-                'X-Accel-Buffering' => 'no',
-                'X-Livewire-Stream' => 'true',
-            ])
-            ->post('http://localhost:11434/api/generate', [
-                'model' => 'llama3.2:3b', // todo make this dynamic
-                'prompt' => 'generate very short arabic post for social media from data not html, just plain text', // todo make this dynamic
-                'stream' => true
-            ]);
+
+        $ollamaPostAction = app(OllamaPostAction::class);
+
+        $response = $ollamaPostAction->execute($post);
 
         if ($response->getStatusCode() === 200) {
             $body = $response->getBody();
@@ -108,57 +250,16 @@ class GeneratePost extends Component
             ob_flush();
             flush();
         }
-
-        $this->generated_post = $this->response;
     }
 
-//     public function mount(){
-//         $this->listModels();
-
-// //        if(!$this->models[0]){
-// //            die("Be sure to add a model to Ollama before running");
-// //            return;
-// //        }
-// //        $this->model == $this->models[0];
-
-//         $this->model = 'tinyllama:latest';
-//     }
-
-    public function modelUpdated(){
-        // $this->response = '';
-    }
-
-    public function listModels()
+    private function arrayToHashtags($array)
     {
-        $command = 'ollama list';
-        $output = [];
-        $returnVar = null;
-        exec($command, $output, $returnVar);
-        if ($returnVar === 0) {
-            $this->models = $output;
-        } else {
-            $this->models = ['Error: Unable to fetch models'];
-        }
+        return array_map(function ($item) {
+            // Sanitize each item (remove spaces and special characters)
+            $item = preg_replace('/[^a-zA-Z0-9]/', '', $item);
 
-        $modelsFiltered = [];
-
-        foreach($this->models as $index => $model){
-            if($index != 0){
-                $modelParts = explode(':', $model);
-                array_push($modelsFiltered, $modelParts[0]);
-            }
-        }
-        $this->models = $modelsFiltered;
-    }
-
-    public function submit(){
-
-        $validated = $this->validate([
-            'generated_post' => ['required', 'string'],
-        ]);
-
-        $this->post->update(['generated_content' => $validated['generated_post']]);  
-
-        return redirect()->route('posts.index');
+            // Add the hash symbol before each item
+            return '#'. \Str::snake($item); // Capitalize the first letter of each hashtag
+        }, $array);
     }
 }
