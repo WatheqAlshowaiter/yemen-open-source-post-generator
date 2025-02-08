@@ -306,10 +306,11 @@ https://laravel-news.com/deepseek-laravel"
         </div>
         <!-- ./Additional links -->
 
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between" x-data>
             <button
                 type="submit"
                 class="inline-block rounded-lg bg-blue-500 px-5 py-3 text-sm font-medium text-white transition hover:bg-blue-600 focus:ring-3 focus:outline-hidden"
+                @click="scrollTo({top: 0, behavior: 'smooth'})"
             >
                 Generate AI Post ✨ 👉
             </button>

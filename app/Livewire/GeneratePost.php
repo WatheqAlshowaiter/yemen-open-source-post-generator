@@ -15,6 +15,7 @@ class GeneratePost extends Component
     public $postGenerated = false;
 
     public $generated_post = '';
+    public $generated_tweet= '';
 
     public $post_created = false;
 
@@ -92,9 +93,9 @@ class GeneratePost extends Component
         //$this->generated_post .= $this->response . "\n\n";
 
         $this->generated_post .= "وصف المشروع\n";
-        $this->generated_post .= $post->repo_description . "\n\n";
+        $this->generated_post .= trim($post->repo_description) . "\n\n";
 
-        $this->generated_post .= implode(' ', $this->arrayToHashtags($post->repo_tags ?? [])) ."\n\n";
+        $this->generated_post .= implode(' ', $this->arrayToHashtags(array_merge($post->repo_tags, ['yemen_open_source', 'yemenopensource']) ?? [])) ."\n\n";
 
 
         //dd($this->generated_post);
@@ -141,12 +142,83 @@ class GeneratePost extends Component
         $this->generated_post .= "\n\nوندعوكم في المساهمة في مشاريعنا مفتوحة المصدر سواء بالتطوير البرمجي أو الترويج لها في مختلف منصات مواقع التواصل الاجتماعي..
 ولا تنسوا متابعة صفحاتنا على مواقع التواصل الاجتماعي كي لا تفوتكم أي مشاريع جديدة ومفيدة..";
 
-        $this->generateTeet($this->post);
+        $this->generateTeet();
 
 
     }
 
-    public function generateTeet(Post $post){
+    public function generateTeet(){
+
+
+        // make it very short 
+        $introductions = [
+            "نرحب بالمبدع {$this->post->author_name}!",
+            "مرحبا بالمبدع {$this->post->author_name}!",
+            "أهلا بمشروع جديد من المبدع {$this->post->author_name}!",
+        ];
+
+
+        $introducingProjects = [
+            "المشروع \"{$this->post->repo_name}\"",
+            "اسم المشروع \"{$this->post->repo_name}\""
+        ];
+
+        $this->generated_tweet = $introductions[array_rand($introductions)]."\n\n";
+        $this->generated_tweet .= $introducingProjects[array_rand($introducingProjects)]."\n\n";
+
+
+//         $this->generated_post .= "وصف المشروع\n";
+        $this->generated_tweet .= trim($this->post->repo_description) . "\n\n";
+        
+
+        $this->generated_tweet .= implode(' ', $this->arrayToHashtags(array_merge($this->post->repo_tags, ['yemen_open_source', 'yemenopensource']) ?? [])) ."\n\n";
+
+
+//         //dd($this->generated_post);
+
+//         $this->generated_post .= "الروابط:\n";
+
+        $this->generated_tweet .= "رابط المشروع\n";
+        $this->generated_tweet .= $this->post->original_url."\n\n";
+
+
+        // if ($this->post->forked_url) {
+        //     $this->generated_tweet .= "رابط المشروع على YemenOpenSource\n";
+        //     $this->generated_tweet .= $this->post->forked_url."\n\n";
+        // }
+
+        // $this->generated_tweet .= "حساب ".$this->post->author_name." على GitHub\n";
+        // $this->generated_tweet .= $this->post->github_user_profile."\n\n";
+
+        // if ($this->post->linkedin_profile) {
+        //     $this->generated_tweet .= "على لينكدن\n";
+        //     $this->generated_tweet .= $this->post->linkedin_profile."\n\n";
+        // }
+
+        if ($this->post->twitter_profile) {
+            $twitterHandle =   ltrim(parse_url($this->post->twitter_profile, PHP_URL_PATH), '/');
+
+            $this->generated_tweet .= '@' . $twitterHandle;
+        }
+
+        // if ($this->post->facebook_profile) {
+        //     $this->generated_tweet .= "فيس بوك\n";
+        //     $this->generated_tweet .= $this->post->facebook_profile."\n\n";
+        // }
+
+        // if ($this->post->author_website) {
+        //     $this->generated_tweet .= "الموقع الشخصي\n";
+        //     $this->generated_tweet .= $this->post->author_website."\n\n";
+        // }
+
+        // if (count($this->post->additional_links) > 0) {
+        //     $this->generated_tweet .= "روابط أخرى\n";
+        //     $this->generated_tweet .= implode("\n", $this->post->additional_links);
+        // }
+
+//         $this->generated_post .= "\n\nوندعوكم في المساهمة في مشاريعنا مفتوحة المصدر سواء بالتطوير البرمجي أو الترويج لها في مختلف منصات مواقع التواصل الاجتماعي..
+// ولا تنسوا متابعة صفحاتنا على مواقع التواصل الاجتماعي كي لا تفوتكم أي مشاريع جديدة ومفيدة..";
+
 
     }
 
@@ -182,9 +254,13 @@ class GeneratePost extends Component
     {
         $validated = $this->validate([
             'generated_post' => ['required', 'string'],
+            'generated_tweet' => ['required', 'string'],
         ]);
 
-        $this->post->update(['generated_content' => $validated['generated_post']]);
+        $this->post->update([
+            'generated_content' => $validated['generated_post'], 
+            'generated_tweet' => $validated['generated_tweet'],
+        ]);
 
         return redirect()->route('posts.index');
     }

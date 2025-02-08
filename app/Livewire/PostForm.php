@@ -28,9 +28,9 @@ class PostForm extends Component
     public $twitter_profile;
     public $author_website;
     public $additional_links = [];
-    public $additional_links_string ;
+    public $additional_links_string;
 
-    public $repo_tags = [];
+    public $repo_tags = ['yemen_open_source', 'yemenopensource'];
     public $repo_tags_string;
 
 
@@ -38,10 +38,8 @@ class PostForm extends Component
     {
         if($postId ){
             $post = Post::findOrFail($postId);
-
-
             $this->forked_url = $post->forked_url;
-            $this->original_url = $post->original_url;  
+            $this->original_url = $post->original_url;
             $this->repo_name = $post->repo_name;
             $this->repo_description = $post->repo_description;
             $this->author_name = $post->author_name;
@@ -55,6 +53,7 @@ class PostForm extends Component
             $this->repo_tags_string = implode(', ', $post->repo_tags );
             $this->additional_links_string = implode("\n", $post->additional_links);
         }
+
     }
 
 
@@ -144,6 +143,8 @@ class PostForm extends Component
 
         $this->author_name = match($tr->translate($englishAuthorName)) {
             'عسميل' => 'إسماعيل',
+            'موث ألينيودي' => 'معاذ السوادي',
+            'عبد الرحمن الوشيبي' => 'عبدالرحمن الصهيبي' ,
             default => $tr->translate($englishAuthorName),
         };
 
@@ -286,6 +287,12 @@ class PostForm extends Component
         $post = Post::updateOrCreate([
             'original_url' => $validated['original_url'],
         ], $validated);
+
+
+        // know if the post is new or not
+        if($post->wasRecentlyCreated) {
+            redirect()->route('posts.edit', $post->id);
+        }
 
 
         // go to the upper in the html page

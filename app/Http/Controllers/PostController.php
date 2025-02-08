@@ -13,9 +13,9 @@ class PostController
 {
     public function index(Request $request): View
     {
-        $posts = Post::all();
+        $posts = Post::orderBy('id', 'desc')->get();
 
-            //todo remove unused comments
+        //todo remove unused comments
         return view('posts.index', [
             'posts' => $posts,
         ]);
