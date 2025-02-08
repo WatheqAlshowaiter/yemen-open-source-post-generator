@@ -7,6 +7,7 @@ use App\Models\Post;
 use App\Spiders\Client;
 use App\Spiders\GitHubProfileSocialMedia;
 use Http;
+use Illuminate\Support\Facades\Session;
 use Livewire\Component;
 use Stichoza\GoogleTranslate\Exceptions\LargeTextException;
 use Stichoza\GoogleTranslate\Exceptions\RateLimitException;
@@ -291,7 +292,9 @@ class PostForm extends Component
 
         // know if the post is new or not
         if($post->wasRecentlyCreated) {
-            redirect()->route('posts.edit', $post->id);
+            // I want to dispatch an event with redirect
+            Session::put('redirectedPost',  $post->id);
+            redirect()->route('posts.edit', ['post' => $post] );
         }
 
 

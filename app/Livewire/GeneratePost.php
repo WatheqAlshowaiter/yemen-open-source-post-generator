@@ -8,6 +8,8 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Livewire\Component;
 use Livewire\Attributes\On;
+use Illuminate\Support\Facades\Session;
+
 
 
 class GeneratePost extends Component
@@ -32,6 +34,14 @@ class GeneratePost extends Component
     // get the Post model instance in the mount
     public function mount()
     {
+        if(Session::has('redirectedPost')){
+
+            $sessionValue = Session::pull('redirectedPost');
+
+            $this->onPostCreated(
+                Post::findOrfail($sessionValue)
+            );
+        }
 
     }
 
