@@ -37,7 +37,7 @@ class PostForm extends Component
 
     public function mount($postId = null)
     {
-        if($postId ){
+        if ($postId) {
             $post = Post::findOrFail($postId);
             $this->forked_url = $post->forked_url;
             $this->original_url = $post->original_url;
@@ -46,12 +46,12 @@ class PostForm extends Component
             $this->author_name = $post->author_name;
             $this->github_user_profile = $post->github_user_profile;
             $this->linkedin_profile = $post->linkedin_profile;
-            $this->facebook_profile  = $post->facebook_profile;
-            $this->twitter_profile  = $post->twitter_profile;
+            $this->facebook_profile = $post->facebook_profile;
+            $this->twitter_profile = $post->twitter_profile;
             $this->author_website = $post->author_website;
             $this->additional_links = $post->additional_links;
             $this->repo_tags = $post->repo_tags;
-            $this->repo_tags_string = implode(', ', $post->repo_tags );
+            $this->repo_tags_string = implode(', ', $post->repo_tags);
             $this->additional_links_string = implode("\n", $post->additional_links);
         }
 
@@ -142,10 +142,13 @@ class PostForm extends Component
 
         $englishAuthorName = $authorUrlResult->name;
 
-        $this->author_name = match($tr->translate($englishAuthorName)) {
+        $this->author_name = match ($tr->translate($englishAuthorName)) {
             'عسميل' => 'إسماعيل',
             'موث ألينيودي' => 'معاذ السوادي',
-            'عبد الرحمن الوشيبي' => 'عبدالرحمن الصهيبي' ,
+            'عبد الرحمن الوشيبي' => 'عبدالرحمن الصهيبي',
+            'ياكوب الحريدار' => 'يعقوب الحيدري',
+            'أحمد علاءاسادي' => 'أحمد الصعدي',
+            'عمر ألوي' => 'عمر العلوي',
             default => $tr->translate($englishAuthorName),
         };
 
@@ -291,10 +294,10 @@ class PostForm extends Component
 
 
         // know if the post is new or not
-        if($post->wasRecentlyCreated) {
+        if ($post->wasRecentlyCreated) {
             // I want to dispatch an event with redirect
-            Session::put('redirectedPost',  $post->id);
-            redirect()->route('posts.edit', ['post' => $post] );
+            Session::put('redirectedPost', $post->id);
+            redirect()->route('posts.edit', ['post' => $post]);
         }
 
 
